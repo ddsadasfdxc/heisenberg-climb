@@ -1,7 +1,7 @@
 /**
  * Combat HUD: hand, enemies, end turn.
  */
-import { el, clear, formatStatuses, intentText } from '../ui/dom.js';
+import { el, clear, formatStatuses, intentText, cardDescription } from '../ui/dom.js';
 import { portrait } from '../ui/art.js';
 
 export class CombatScene {
@@ -117,7 +117,7 @@ export class CombatScene {
           el('div', { class: 'cost', text: String(card.cost) }),
           el('div', { class: 'cname', text: card.name }),
           el('div', { class: 'ctype', text: card.type }),
-          el('div', { class: 'cdesc', text: card.description }),
+          el('div', { class: 'cdesc', text: cardDescription(card) }),
         ],
       );
     });
@@ -170,6 +170,9 @@ export class CombatScene {
             disabled: s.phase !== 'player',
             onClick: () => c.endTurn(),
           }),
+          ...(g.run?.characterId === 'saul' && !c.flags.negotiated ? [el('button', {
+            class: 'btn negotiate-btn', text: 'Negotiate', disabled: s.phase !== 'player', onClick: () => c.negotiate(),
+          })] : []),
         ]),
       ]),
     ]);

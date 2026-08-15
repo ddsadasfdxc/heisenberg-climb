@@ -32,8 +32,10 @@ const ZH = {
   "Heisenberg's Hat": '海森堡之帽', "Mike's Pocket Watch": '迈克的怀表', "Saul's Bluetooth": '索尔的蓝牙耳机',
   'Pink Teddy Bear': '粉色泰迪熊', 'Los Pollos Bucket': '炸鸡兄弟全家桶', 'The Ricin Cigarette': '蓖麻毒素香烟',
   'Box Cutter': '美工刀', "Huell's Vacuum": '休尔的吸尘器', 'Kevlar Vest': '防弹背心',
+  'Poison': '中毒', 'Chemical Burn': '化学灼伤', 'Vulnerable': '易伤', 'Weak': '虚弱', 'Frail': '脆弱', 'Purity': '纯度', 'Loophole': '法律漏洞', 'Setup': '准备', 'Strength': '力量', 'Ritual': '仪式',
   'attack': '攻击', 'skill': '技能', 'status': '状态', 'common': '普通', 'uncommon': '罕见', 'rare': '稀有', 'legendary': '传奇', 'curse': '诅咒',
-  'Cancel': '取消', 'Finish': '完成', 'Delete local save?': '确定删除本地存档？', 'Abandon this run?': '确定放弃本局？',
+  'Negotiate': '谈判脱身', 'Deal closed. Half the cash is gone.': '交易达成，一半现金没了。', 'The fine print catches up: Weak 2.': '合同里的小字开始生效：虚弱 2 层。',
+  'Not your turn.': '还没轮到你。', 'Card not in hand.': '这张牌不在手中。', 'Cancel': '取消', 'Finish': '完成', 'Delete local save?': '确定删除本地存档？', 'Abandon this run?': '确定放弃本局？',
   '— Combat start —': '— 战斗开始 —', 'Shuffle discard into draw.': '将弃牌堆洗入抽牌堆。', 'Victory!': '战斗胜利！', 'Defeat...': '战斗失败……',
   'Loophole! Enemy intents skipped.': '法律漏洞！敌方本回合行动被跳过。', 'Pink Teddy Bear saves you!': '粉色泰迪熊救了你一命！',
   'I am the danger.': '我就是危险。', 'We’re done when I say we’re done.': '我说结束，才算结束。', 'I did it for me. I liked it.': '我是为自己做的。我喜欢。',
@@ -56,6 +58,8 @@ export function initLocale(saved) { setLocale(saved || localStorage.getItem('cli
 export function t(value) {
   if (locale !== 'zh' || typeof value !== 'string') return value;
   if (ZH[value]) return ZH[value];
+  const quote = value.match(/^“(.+)”$/);
+  if (quote) return `“${t(quote[1])}”`;
   let s = value;
   const replacements = [
     [/^Enter: (.+)$/, (_, x) => `进入：${t(x)}`],

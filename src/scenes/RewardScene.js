@@ -1,7 +1,7 @@
 /**
  * Post-combat card draft.
  */
-import { el, clear } from '../ui/dom.js';
+import { el, clear, cardDescription } from '../ui/dom.js';
 import { sceneArt } from '../ui/art.js';
 
 export class RewardScene {
@@ -40,7 +40,7 @@ export class RewardScene {
           el('div', { class: 'cost', text: String(def.cost) }),
           el('div', { class: 'cname', text: def.name }),
           el('div', { class: 'ctype', text: `${def.type} · ${def.rarity}` }),
-          el('div', { class: 'cdesc', text: def.description }),
+          el('div', { class: 'cdesc', text: cardDescription(def) }),
         ],
       ),
     );

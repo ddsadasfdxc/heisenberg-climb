@@ -210,3 +210,6 @@ html[lang='zh-CN'] .card .cdesc { line-height: 1.5; }
 .roster-list .name { font-size: 1.02rem; letter-spacing: .025em; }
 html[lang='zh-CN'] .roster-list .desc { font-size: .8rem; }
 @media (min-width:700px) { .roster-list { grid-template-columns:1fr 1fr; max-width:900px; width:100%; margin:0 auto; } .roster-list > .btn { grid-column:1/-1; } }
+
+.action-bar:has(.negotiate-btn) { grid-template-columns: 1fr 1fr; }
+.action-bar .negotiate-btn { grid-column: 1 / -1; border-color: rgba(240,193,74,.55); }

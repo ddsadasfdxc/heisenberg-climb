@@ -103,6 +103,7 @@ export class Game {
     this.state = state;
     this.uiLayer.innerHTML = '';
     if (state !== 'combat') this.clearMud();
+    if (this.mudLayer) this.mudLayer.classList.toggle('hidden', state !== 'combat');
     const map = {
       menu: 'menu',
       map: 'map',

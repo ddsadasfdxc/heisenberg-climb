@@ -23,7 +23,7 @@ export class CombatSystem {
     this.turn = 0;
     this.cardsPlayed = 0;
     this.selectedCardUid = null;
-    this.flags = { firstAttackCrit: false };
+    this.flags = { firstAttackCrit: false, negotiated: false };
 
     const charDef = CHARACTERS[run.characterId];
     this.player = {
@@ -61,6 +61,12 @@ export class CombatSystem {
       if (bl) this.log(`“${bl}”`, 'warn');
     }
     this.beginPlayerTurn();
+    if (this.run.flags?.negotiationDebt) {
+      this.resolver.applyStatus(this.player, 'weak', 2);
+      this.player.statuses.weak = 3; // begin-turn decay leaves the promised 2 turns
+      delete this.run.flags.negotiationDebt;
+      this.log('The fine print catches up: Weak 2.', 'warn');
+    }
     this.applyRelicTriggers('combat_start');
     if (this.enemies.some((e) => e.tags?.includes('boss'))) this.applyRelicTriggers('boss_enter');
     this.checkEnd();
@@ -202,6 +208,19 @@ export class CombatSystem {
     this.checkEnd();
     this.emitUpdate();
     return { ok: true };
+  }
+
+  negotiate() {
+    if (this.run.characterId !== 'saul' || this.flags.negotiated || this.phase !== 'player') return false;
+    this.flags.negotiated = true;
+    this.run.gold = Math.floor((this.run.gold || 0) * 0.5);
+    this.run.flags = this.run.flags || {};
+    this.run.flags.negotiationDebt = true;
+    for (const enemy of this.enemies) { enemy.hp = 0; enemy.dead = true; }
+    this.log('Deal closed. Half the cash is gone.', 'warn');
+    this.checkEnd();
+    this.emitUpdate();
+    return true;
   }
 
   endTurn() {
@@ -378,7 +397,7 @@ export class CombatSystem {
         this.resolver.applyStatus(unit, 'strength', (def.valuePerStack || 1) * stacks);
       }
       // duration decrement for non-stackable duration statuses
-      if (!def.stackable && def.duration) {
+      if (!def.stackable && def.duration && id !== 'loophole') {
         unit.statuses[id] = stacks - 1;
         if (unit.statuses[id] <= 0) delete unit.statuses[id];
       }

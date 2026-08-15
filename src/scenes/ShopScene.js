@@ -1,7 +1,7 @@
 /**
  * Run shop: buy cards / relics, remove a card.
  */
-import { el, clear } from '../ui/dom.js';
+import { el, clear, cardDescription } from '../ui/dom.js';
 import { sceneArt } from '../ui/art.js';
 import { CARDS } from '../data/cards.js';
 import { RELICS, relicPrice } from '../data/relics.js';
@@ -62,7 +62,7 @@ export class ShopScene {
           el('div', { class: 'cost', text: String(def.cost) }),
           el('div', { class: 'cname', text: def.name }),
           el('div', { class: 'ctype', text: `${def.type} · ${def.rarity}` }),
-          el('div', { class: 'cdesc', text: def.description }),
+          el('div', { class: 'cdesc', text: cardDescription(def) }),
           el('div', { class: 'price', text: sold ? 'SOLD' : `${price}g` }),
         ],
       );
@@ -86,7 +86,7 @@ export class ShopScene {
         [
           el('div', { class: 'cname', text: def.name }),
           el('div', { class: 'ctype', text: def.rarity }),
-          el('div', { class: 'cdesc', text: def.description }),
+          el('div', { class: 'cdesc', text: cardDescription(def) }),
           el('div', { class: 'price', text: sold ? 'SOLD' : `${price}g` }),
         ],
       );
