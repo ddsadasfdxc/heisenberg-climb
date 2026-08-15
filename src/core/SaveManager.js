@@ -18,7 +18,7 @@ export class SaveManager {
         mike: { xp: 0, skillTree: [], ascension: 0, wins: 0, deaths: 0 },
       },
       globalUnlocks: { cards: [], relics: [], events: [], easterEggs: [] },
-      settings: { sfx: 0.8, music: 0.6, textSpeed: 'fast', screenShake: true },
+      settings: { sfx: 0.8, music: 0.6, textSpeed: 'fast', screenShake: true, language: 'en' },
       currentRun: null,
     };
   }

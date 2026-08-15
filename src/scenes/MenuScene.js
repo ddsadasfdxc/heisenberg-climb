@@ -3,6 +3,8 @@
  */
 import { el, clear } from '../ui/dom.js';
 import { SaveManager } from '../core/SaveManager.js';
+import { getLocale } from '../core/i18n.js';
+import { portrait, sceneArt } from '../ui/art.js';
 
 export class MenuScene {
   /** @param {import('../core/Game.js').Game} game */
@@ -28,7 +30,11 @@ export class MenuScene {
     const hasRun = !!this.game.save?.currentRun;
 
     if (this.mode === 'title') {
-      this.root = el('div', { class: 'screen menu-screen' }, [
+      this.root = el('div', { class: 'screen menu-screen art-screen', style: `--scene-art:url("${sceneArt('desert')}")` }, [
+        el('div', { class: 'top-tools' }, [
+          el('button', { class: 'icon-btn', text: getLocale() === 'zh' ? 'EN' : '中文', onClick: () => this.game.toggleLanguage() }),
+          el('button', { class: 'icon-btn', text: this.game.audio.enabled ? '🔊' : '🔇', onClick: () => this.game.toggleSound() }),
+        ]),
         el('div', { class: 'title-block' }, [
           el('h1', { text: 'BCS & BB' }),
           el('div', { class: 'sub', text: 'The Climb — desert roguelike deckbuilder' }),
@@ -84,10 +90,13 @@ export class MenuScene {
                 onClick: () => this.game.startRun(c.id),
               },
               [
-                el('div', { class: 'name', text: c.name }),
-                el('div', { class: 'desc', text: `${c.title} · HP ${c.hp}` }),
-                el('div', { class: 'desc', text: `${c.talent.name}: ${c.talent.description}` }),
-                el('div', { class: 'desc', text: `W/L ${prog.wins || 0}/${prog.deaths || 0}` }),
+                el('img', { class: 'char-portrait', src: portrait(c.id, c.name), alt: c.name }),
+                el('div', { class: 'char-copy' }, [
+                  el('div', { class: 'name', text: c.name }),
+                  el('div', { class: 'desc', text: `${c.title} · HP ${c.hp}` }),
+                  el('div', { class: 'desc', text: `${c.talent.name}: ${c.talent.description}` }),
+                  el('div', { class: 'desc', text: `W/L ${prog.wins || 0}/${prog.deaths || 0}` }),
+                ]),
               ],
             );
           }),

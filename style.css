@@ -142,6 +142,24 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .modal h2 { margin: 0; font-size: 1.35rem; }
 .modal p { margin: 0; color: var(--muted); line-height: 1.5; }
 
+/* Illustrated presentation */
+.art-screen::before {
+  content: ''; position: absolute; inset: 0 0 auto; height: 34vh; z-index: -1;
+  background-image: linear-gradient(to bottom, transparent 30%, var(--bg) 100%), var(--scene-art);
+  background-size: cover; background-position: center; opacity: .78;
+}
+.art-screen::after { content: ''; position: absolute; inset: 0; z-index: -2; background: linear-gradient(135deg,#091018,#17151d); }
+.top-tools { position: absolute; z-index: 5; top: calc(8px + env(safe-area-inset-top)); right: 10px; display: flex; gap: 7px; }
+.icon-btn { min-width: 43px; height: 38px; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(10,15,22,.72); color: white; font-weight: 800; backdrop-filter: blur(8px); }
+.char-btn { grid-template-columns: 64px 1fr; align-items: center; }
+.char-portrait { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,.25); }
+.char-copy { min-width: 0; display: grid; gap: 4px; }
+.enemy-portrait { display: block; width: 64px; height: 64px; margin: -28px auto 4px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,.3); box-shadow: 0 6px 16px rgba(0,0,0,.45); }
+.enemy-card { margin-top: 22px; }
+.card::before { content: ''; height: 32px; border-radius: 7px; background: linear-gradient(135deg,rgba(61,214,198,.2),rgba(240,193,74,.12)), repeating-linear-gradient(45deg,transparent 0 7px,rgba(255,255,255,.04) 7px 9px); border: 1px solid rgba(255,255,255,.08); }
+html[lang='zh-CN'] body { font-family: "Noto Sans SC", "PingFang SC", system-ui, sans-serif; }
+html[lang='zh-CN'] .card .cdesc { line-height: 1.5; }
+
 /* Phase 2: map, rewards, shop, events and rest */
 .map-body { flex: 1; overflow: auto; }
 .map-title, .shop-section h3 { margin: 0 0 8px; }

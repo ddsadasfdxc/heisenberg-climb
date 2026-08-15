@@ -2,6 +2,7 @@
  * Rest site: heal or smith (upgrade).
  */
 import { el, clear } from '../ui/dom.js';
+import { sceneArt } from '../ui/art.js';
 import { CARDS } from '../data/cards.js';
 
 export class RestScene {
@@ -49,7 +50,7 @@ export class RestScene {
             }),
           )
         : [el('div', { class: 'sub', text: 'No upgradable cards.' })];
-      this.root = el('div', { class: 'screen rest-screen' }, [
+      this.root = el('div', { class: 'screen rest-screen art-screen', style: `--scene-art:url("${sceneArt('rest')}")` }, [
         el('div', { class: 'title-block' }, [
           el('h1', { text: 'Smith' }),
           el('div', { class: 'sub', text: 'Choose a card to upgrade.' }),
@@ -71,7 +72,7 @@ export class RestScene {
     }
 
     const healAmt = Math.round(run.maxHp * 0.3);
-    this.root = el('div', { class: 'screen rest-screen' }, [
+    this.root = el('div', { class: 'screen rest-screen art-screen', style: `--scene-art:url("${sceneArt('rest')}")` }, [
       el('div', { class: 'panel' }, [
         el('div', { class: 'stat-row' }, [
           el('span', { class: 'pill hp', html: `HP <span>${run.hp}/${run.maxHp}</span>` }),

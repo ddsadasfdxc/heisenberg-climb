@@ -2,6 +2,7 @@
  * Run shop: buy cards / relics, remove a card.
  */
 import { el, clear } from '../ui/dom.js';
+import { sceneArt } from '../ui/art.js';
 import { CARDS } from '../data/cards.js';
 import { RELICS, relicPrice } from '../data/relics.js';
 
@@ -93,7 +94,7 @@ export class ShopScene {
 
     const removePrice = Math.max(1, Math.round((offer.removePrice || 50) * mult));
 
-    this.root = el('div', { class: 'screen shop-screen' }, [
+    this.root = el('div', { class: 'screen shop-screen art-screen', style: `--scene-art:url("${sceneArt('shop')}")` }, [
       el('div', { class: 'panel' }, [
         el('div', { class: 'stat-row' }, [
           el('span', { class: 'pill hp', html: `HP <span>${run.hp}/${run.maxHp}</span>` }),

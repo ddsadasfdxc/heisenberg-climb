@@ -18,6 +18,8 @@ import { RELICS, availableRelics, relicPrice } from '../data/relics.js';
 import { getEvent, listEvents } from '../data/events.js';
 import { el } from '../ui/dom.js';
 import { pick, shuffle } from '../utils/rng.js';
+import { AudioManager } from './AudioManager.js';
+import { initLocale, getLocale, setLocale, t } from './i18n.js';
 
 export class Game {
   /**
@@ -29,6 +31,8 @@ export class Game {
     this.mudLayer = mudLayer;
     this.bus = new EventBus();
     this.save = SaveManager.load();
+    initLocale(localStorage.getItem('climb-language') || this.save.settings?.language);
+    this.audio = new AudioManager();
     this.autosave = SaveManager.createAutosave(() => this.serialize());
     this.state = 'boot';
     /** @type {any} */
@@ -50,6 +54,9 @@ export class Game {
 
     this.bus.on('mud:log', ({ text, cls }) => this.pushMud(text, cls));
     this.bus.on('combat:end', (payload) => this.onCombatEnd(payload));
+    this.bus.on('combat:update', () => this.audio.play('card'));
+    document.addEventListener('pointerdown', () => this.audio.unlock(), { once: true });
+    document.addEventListener('click', (e) => { if (e.target.closest?.('button')) this.audio.play('click'); });
   }
 
   boot() {
@@ -115,9 +122,11 @@ export class Game {
 
   pushMud(text, cls = '') {
     if (!this.mudLayer) return;
+    if (cls === 'dmg') this.audio.play('hit');
+    else if (cls === 'good') this.audio.play('heal');
     const line = document.createElement('div');
     line.className = `line ${cls || ''}`.trim();
-    line.textContent = text;
+    line.textContent = t(text);
     this.mudLayer.appendChild(line);
     while (this.mudLayer.children.length > 40) this.mudLayer.removeChild(this.mudLayer.firstChild);
     this.mudLayer.scrollTop = this.mudLayer.scrollHeight;
@@ -125,6 +134,19 @@ export class Game {
 
   clearMud() {
     if (this.mudLayer) this.mudLayer.innerHTML = '';
+  }
+
+  toggleLanguage() {
+    const next = getLocale() === 'zh' ? 'en' : 'zh';
+    setLocale(next);
+    this.save.settings = { ...(this.save.settings || {}), language: next };
+    SaveManager.save(this.save);
+    this.activeScene?.mount?.();
+  }
+
+  toggleSound() {
+    this.audio.toggle();
+    this.activeScene?.mount?.();
   }
 
   /** Start a fresh run */

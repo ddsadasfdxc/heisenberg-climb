@@ -1,9 +1,11 @@
 /** Tiny DOM helpers */
+import { t } from '../core/i18n.js';
 export function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
     if (k === 'class') node.className = v;
-    else if (k === 'text') node.textContent = v;
+    else if (k === 'text') node.textContent = t(v);
+    else if (k === 'title') node.title = t(v);
     else if (k === 'html') node.innerHTML = v;
     else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2).toLowerCase(), v);
     else if (v !== false && v != null) node.setAttribute(k, v === true ? '' : String(v));

@@ -2,6 +2,7 @@
  * Combat HUD: hand, enemies, end turn.
  */
 import { el, clear, formatStatuses, intentText } from '../ui/dom.js';
+import { portrait } from '../ui/art.js';
 
 export class CombatScene {
   /** @param {import('../core/Game.js').Game} game */
@@ -71,6 +72,7 @@ export class CombatScene {
           },
         },
         [
+          el('img', { class: 'enemy-portrait', src: portrait(e.defId, e.name), alt: e.name }),
           el('div', { class: 'ename', text: e.name }),
           el('div', { class: 'intent', text: e.dead ? 'DOWN' : intentText(e.intent) }),
           el('div', { class: 'bar' }, [el('i', { style: `width:${hpPct}%` })]),

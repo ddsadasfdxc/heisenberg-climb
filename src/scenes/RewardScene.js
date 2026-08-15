@@ -2,6 +2,7 @@
  * Post-combat card draft.
  */
 import { el, clear } from '../ui/dom.js';
+import { sceneArt } from '../ui/art.js';
 
 export class RewardScene {
   /** @param {import('../core/Game.js').Game} game */
@@ -44,7 +45,7 @@ export class RewardScene {
       ),
     );
 
-    this.root = el('div', { class: 'screen reward-screen' }, [
+    this.root = el('div', { class: 'screen reward-screen art-screen', style: `--scene-art:url("${sceneArt('desert')}")` }, [
       el('div', { class: 'title-block', style: 'margin-top:6vh' }, [
         el('h1', { text: 'Loot' }),
         el('div', {
