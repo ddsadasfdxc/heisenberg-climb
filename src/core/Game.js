@@ -17,6 +17,7 @@ import { RestScene } from '../scenes/RestScene.js';
 import { RELICS, availableRelics, relicPrice } from '../data/relics.js';
 import { getEvent, listEvents } from '../data/events.js';
 import { el } from '../ui/dom.js';
+import { sceneArt } from '../ui/art.js';
 import { pick, shuffle } from '../utils/rng.js';
 import { AudioManager } from './AudioManager.js';
 import { initLocale, getLocale, setLocale, t } from './i18n.js';
@@ -333,7 +334,7 @@ export class Game {
         },
       });
     });
-    shop.root = el('div', { class: 'screen shop-screen' }, [
+    shop.root = el('div', { class: 'screen shop-screen art-screen', style: `--scene-art:url("${sceneArt('shop')}")` }, [
       el('div', { class: 'title-block' }, [el('h1', { text: 'Discreet Deletion' }), el('div', { class: 'sub', text: `Remove one card for ${price} gold.` })]),
       el('div', { class: 'removal-list' }, choices),
       el('button', { class: 'btn', text: 'Cancel', onClick: () => shop.mount() }),

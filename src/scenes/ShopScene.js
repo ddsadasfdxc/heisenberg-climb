@@ -2,7 +2,8 @@
  * Run shop: buy cards / relics, remove a card.
  */
 import { el, clear, cardDescription } from '../ui/dom.js';
-import { sceneArt } from '../ui/art.js';
+import { sceneArt, sceneStyle, cardSuit } from '../ui/art.js';
+import { cardArt } from '../ui/cardArt.js';
 import { CARDS } from '../data/cards.js';
 import { RELICS, relicPrice } from '../data/relics.js';
 
@@ -50,7 +51,8 @@ export class ShopScene {
       return el(
         'button',
         {
-          class: `shop-slot card-slot${sold ? ' sold' : ''}`,
+          class: `shop-slot card-slot ${def.type || 'skill'}${sold ? ' sold' : ''}`,
+          style: `--card-art:url("${cardArt(def.id, def.type)}")`,
           disabled: sold || run.gold < price,
           onClick: () => {
             if (sold) return;
@@ -60,6 +62,8 @@ export class ShopScene {
         },
         [
           el('div', { class: 'cost', text: String(def.cost) }),
+          el('span', { class: 'card-suit', text: cardSuit(def.type) }),
+          el('span', { class: 'card-visual' }, [el('span', { class: 'card-stamp', text: def.rarity })]),
           el('div', { class: 'cname', text: def.name }),
           el('div', { class: 'ctype', text: `${def.type} · ${def.rarity}` }),
           el('div', { class: 'cdesc', text: cardDescription(def) }),
@@ -76,7 +80,8 @@ export class ShopScene {
       return el(
         'button',
         {
-          class: `shop-slot relic-slot${sold ? ' sold' : ''}`,
+          class: `shop-slot relic-slot power${sold ? ' sold' : ''}`,
+          style: `--card-art:url("${cardArt(def.id, 'power')}")`,
           disabled: sold || run.gold < price,
           onClick: () => {
             g.buyShopRelic(idx);
@@ -84,6 +89,8 @@ export class ShopScene {
           },
         },
         [
+          el('span', { class: 'card-suit', text: 'RX' }),
+          el('span', { class: 'card-visual' }, [el('span', { class: 'card-stamp', text: def.rarity })]),
           el('div', { class: 'cname', text: def.name }),
           el('div', { class: 'ctype', text: def.rarity }),
           el('div', { class: 'cdesc', text: cardDescription(def) }),
@@ -94,7 +101,7 @@ export class ShopScene {
 
     const removePrice = Math.max(1, Math.round((offer.removePrice || 50) * mult));
 
-    this.root = el('div', { class: 'screen shop-screen art-screen', style: `--scene-art:url("${sceneArt('shop')}")` }, [
+    this.root = el('div', { class: 'screen shop-screen art-screen', style: sceneStyle('shop') }, [
       el('div', { class: 'panel' }, [
         el('div', { class: 'stat-row' }, [
           el('span', { class: 'pill hp', html: `HP <span>${run.hp}/${run.maxHp}</span>` }),

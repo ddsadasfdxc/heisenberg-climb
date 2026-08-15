@@ -1,23 +1,43 @@
 /**
- * Combat HUD: hand, enemies, end turn.
+ * Combat HUD: tactical stage, enemy dossiers and illustrated hand.
  */
 import { el, clear, formatStatuses, intentText, cardDescription } from '../ui/dom.js';
-import { portrait } from '../ui/art.js';
+import { portrait, sceneStyle, cardSuit } from '../ui/art.js';
+import { cardArt } from '../ui/cardArt.js';
+
+function cardNode(card, className, onClick, disabled = false, footer = null) {
+  const type = card.type || 'skill';
+  const artId = card.defId || card.id;
+  return el('button', {
+    class: `game-card ${type} ${className || ''}`.trim(),
+    disabled,
+    style: `--card-art:url("${cardArt(artId, type)}")`,
+    onClick,
+    'aria-label': `${card.name}: ${cardDescription(card)}`,
+  }, [
+    el('span', { class: 'card-cost', text: String(card.cost ?? 0) }),
+    el('span', { class: 'card-suit', text: cardSuit(type) }),
+    el('span', { class: 'card-visual', 'aria-hidden': 'true' }, [
+      el('span', { class: 'card-stamp', text: card.rarity || type }),
+    ]),
+    el('span', { class: 'card-name', text: card.name }),
+    el('span', { class: 'card-type', text: `${type} // ${card.rarity || 'standard'}` }),
+    el('span', { class: 'card-copy', text: cardDescription(card) }),
+    footer,
+  ]);
+}
 
 export class CombatScene {
-  /** @param {import('../core/Game.js').Game} game */
   constructor(game) {
     this.game = game;
     this.root = null;
     this.unsub = null;
     this.snap = null;
-    this.pendingUid = null;
     this.ended = false;
   }
 
   enter() {
     this.ended = false;
-    this.pendingUid = null;
     this.snap = this.game.combat?.snapshot?.() || null;
     this.unsub = this.game.bus.on('combat:update', (s) => {
       this.snap = s;
@@ -29,10 +49,9 @@ export class CombatScene {
   exit() {
     if (typeof this.unsub === 'function') this.unsub();
     this.unsub = null;
-    if (this.root?.parentNode) this.root.remove();
+    this.root?.remove();
     this.root = null;
     this.snap = null;
-    this.pendingUid = null;
   }
 
   mount() {
@@ -40,150 +59,167 @@ export class CombatScene {
     const c = g.combat;
     const ui = g.uiLayer;
     clear(ui);
-    if (!c) {
-      g.goto('map');
-      return;
-    }
+    if (!c) return g.goto('map');
+
     const s = this.snap || c.snapshot();
     this.snap = s;
     const p = s.player;
     const selected = s.hand.find((card) => card.uid === s.selectedCardUid) || null;
-    const needsTarget = !!(selected && selected.needsTarget);
+    const needsTarget = !!selected?.needsTarget;
+    const liveEnemies = s.enemies.filter((e) => !e.dead);
+    const bossFight = s.enemies.some((e) => e.tags?.includes('boss'));
+    const scene = bossFight ? 'boss' : 'combat';
 
-    const enemyEls = s.enemies.map((e) => {
+    const enemies = s.enemies.map((e, index) => {
       const hpPct = Math.max(0, Math.min(100, (e.hp / Math.max(1, e.maxHp)) * 100));
-      const cls = ['enemy-card'];
-      if (e.dead) cls.push('dead');
-      if (needsTarget && !e.dead) cls.push('targetable');
-      return el(
-        'div',
-        {
-          class: cls.join(' '),
-          onClick: () => {
-            if (e.dead || s.phase !== 'player') return;
-            if (selected?.needsTarget) {
-              const r = c.playCard(selected.uid, e.id);
-              if (!r.ok && r.reason === 'no_energy') g.pushMud('Not enough energy.', 'warn');
-            } else if (selected) {
-              // non-target card; clicking enemy ignored
-            } else {
-              g.pushMud(`${e.name}: ${intentText(e.intent)}`, 'sys');
-            }
-          },
+      const classes = [
+        'enemy-dossier',
+        e.tags?.includes('boss') ? 'boss' : '',
+        e.dead ? 'dead' : '',
+        needsTarget && !e.dead ? 'targetable' : '',
+      ].filter(Boolean).join(' ');
+
+      return el('button', {
+        class: classes,
+        style: `--enemy-index:${index}`,
+        disabled: e.dead,
+        onClick: () => {
+          if (e.dead || s.phase !== 'player') return;
+          if (selected?.needsTarget) {
+            const result = c.playCard(selected.uid, e.id);
+            if (!result.ok) this.feedback(result.reason);
+          } else {
+            g.pushMud(`${e.name}: ${intentText(e.intent)}`, 'sys');
+          }
         },
-        [
+      }, [
+        el('span', { class: 'enemy-case', text: e.tags?.includes('boss') ? 'PRIORITY TARGET' : `CASE 0${index + 1}` }),
+        el('span', { class: 'enemy-image-wrap' }, [
           el('img', { class: 'enemy-portrait', src: portrait(e.defId, e.name), alt: e.name }),
-          el('div', { class: 'ename', text: e.name }),
-          el('div', { class: 'intent', text: e.dead ? 'DOWN' : intentText(e.intent) }),
-          el('div', { class: 'bar' }, [el('i', { style: `width:${hpPct}%` })]),
-          el('div', {
-            class: 'status-line',
-            text: e.dead ? '—' : `HP ${e.hp}/${e.maxHp}${e.block ? ` · BLK ${e.block}` : ''}`,
-          }),
-          el('div', { class: 'status-line', text: formatStatuses(e.statuses) || ' ' }),
-        ],
-      );
-    });
-
-    const handEls = s.hand.map((card) => {
-      const unplayable = card.unplayable || s.phase !== 'player' || p.energy < card.cost;
-      const cls = ['card'];
-      if (card.uid === s.selectedCardUid) cls.push('selected');
-      if (unplayable) cls.push('unplayable');
-      return el(
-        'div',
-        {
-          class: cls.join(' '),
-          onClick: () => {
-            if (s.phase !== 'player' || this.ended) return;
-            if (card.uid === s.selectedCardUid) {
-              // second tap plays if no target needed
-              if (!card.needsTarget) {
-                const r = c.playCard(card.uid, null);
-                if (!r.ok) this.feedback(r.reason);
-              } else {
-                c.selectCard(card.uid); // deselect
-              }
-              return;
-            }
-            c.selectCard(card.uid);
-            if (!card.needsTarget) {
-              // auto-play non-target on first confirm style: require double tap via selected
-              // keep selected so user taps again or uses Play
-            }
-          },
-        },
-        [
-          el('div', { class: 'cost', text: String(card.cost) }),
-          el('div', { class: 'cname', text: card.name }),
-          el('div', { class: 'ctype', text: card.type }),
-          el('div', { class: 'cdesc', text: cardDescription(card) }),
-        ],
-      );
-    });
-
-    const playDisabled =
-      s.phase !== 'player' || !selected || (selected.needsTarget && s.enemies.filter((e) => !e.dead).length !== 1);
-
-    this.root = el('div', { class: 'screen combat-screen' }, [
-      el('div', { class: 'panel' }, [
-        el('div', { class: 'stat-row' }, [
-          el('span', { class: 'pill hp', html: `HP <span>${p.hp}/${p.maxHp}</span>` }),
-          el('span', { class: 'pill block', html: `BLK <span>${p.block || 0}</span>` }),
-          el('span', { class: 'pill energy', html: `EN <span>${p.energy}/${p.maxEnergy}</span>` }),
-          el('span', { class: 'pill', text: `T${s.turn}` }),
-          el('span', { class: 'pill', text: `DRAW ${s.drawCount}` }),
-          el('span', { class: 'pill', text: `DISC ${s.discardCount}` }),
+          el('span', { class: 'enemy-scan', 'aria-hidden': 'true' }),
         ]),
-        el('div', { class: 'status-line', text: formatStatuses(p.statuses) || 'No statuses' }),
-      ]),
-      el('div', { class: 'combat-stage' }, [el('div', { class: 'enemy-row' }, enemyEls)]),
-      el('div', { class: 'hand-area' }, [
-        el('div', {
-          class: 'status-line',
-          text:
-            s.phase !== 'player'
-              ? `Phase: ${s.phase}`
-              : needsTarget
-                ? 'Select a target enemy'
-                : selected
-                  ? 'Tap card again or Play'
-                  : 'Select a card',
+        el('span', { class: 'enemy-name', text: e.name }),
+        el('span', { class: 'enemy-intent-label', text: 'NEXT MOVE' }),
+        el('span', { class: `enemy-intent ${e.intent?.type || ''}`, text: e.dead ? 'DOWN' : intentText(e.intent) }),
+        el('span', { class: 'health-track' }, [el('i', { style: `width:${hpPct}%` })]),
+        el('span', {
+          class: 'enemy-vitals',
+          text: e.dead ? 'NEUTRALIZED' : `HP ${e.hp}/${e.maxHp}${e.block ? ` · BLK ${e.block}` : ''}`,
         }),
-        el('div', { class: 'hand' }, handEls),
+        el('span', { class: 'enemy-statuses', text: formatStatuses(e.statuses) || 'NO ACTIVE EFFECTS' }),
+      ]);
+    });
+
+    const hand = s.hand.map((card, index) => {
+      const unplayable = card.unplayable || s.phase !== 'player' || p.energy < card.cost;
+      const className = [
+        card.uid === s.selectedCardUid ? 'selected' : '',
+        unplayable ? 'unplayable' : '',
+      ].filter(Boolean).join(' ');
+
+      const node = cardNode(card, className, () => {
+        if (s.phase !== 'player' || this.ended || card.unplayable) return;
+        if (card.uid === s.selectedCardUid) {
+          if (!card.needsTarget) {
+            const result = c.playCard(card.uid, null);
+            if (!result.ok) this.feedback(result.reason);
+          } else {
+            c.selectCard(card.uid);
+          }
+          return;
+        }
+        c.selectCard(card.uid);
+      });
+      node.style.setProperty('--hand-index', index);
+      return node;
+    });
+
+    const instruction = s.phase !== 'player'
+      ? `Phase: ${s.phase}`
+      : needsTarget
+        ? 'Select a marked target'
+        : selected
+          ? 'Tap again to confirm — or use Play'
+          : 'Select a card from your hand';
+    const playerHp = Math.max(0, Math.min(100, (p.hp / Math.max(1, p.maxHp)) * 100));
+
+    this.root = el('div', {
+      class: `screen combat-screen cinematic-screen ${bossFight ? 'boss-fight' : ''}`,
+      style: sceneStyle(scene),
+    }, [
+      el('div', { class: 'combat-backdrop', 'aria-hidden': 'true' }, [
+        el('div', { class: 'desert-haze' }),
+        el('div', { class: 'stage-vignette' }),
+      ]),
+      el('header', { class: 'combat-command' }, [
+        el('div', { class: 'command-brand' }, [
+          el('span', { class: 'eyebrow', text: bossFight ? 'FINAL INTERCEPT' : 'FIELD OPERATION' }),
+          el('strong', { text: bossFight ? 'LOS POLLOS HQ' : 'ALBUQUERQUE // ACTIVE' }),
+        ]),
+        el('div', { class: 'command-turn' }, [el('small', { text: 'TURN' }), el('b', { text: String(s.turn).padStart(2, '0') })]),
+        el('div', { class: 'combat-resources' }, [
+          el('span', { class: 'resource hp-resource' }, [
+            el('small', { text: 'VITALS' }),
+            el('b', {}, [document.createTextNode(String(p.hp)), el('em', { text: `/${p.maxHp}` })]),
+            el('i', { style: `--fill:${playerHp}%` }),
+          ]),
+          el('span', { class: 'resource block-resource' }, [el('small', { text: 'ARMOR' }), el('b', { text: String(p.block || 0) })]),
+          el('span', { class: 'resource energy-resource' }, [
+            el('small', { text: 'ENERGY' }),
+            el('b', {}, [document.createTextNode(String(p.energy)), el('em', { text: `/${p.maxEnergy}` })]),
+          ]),
+        ]),
+      ]),
+      el('div', { class: 'combat-meta' }, [
+        el('span', { text: formatStatuses(p.statuses) || 'STATUS // CLEAN' }),
+        el('span', {
+          text: `DRAW ${String(s.drawCount).padStart(2, '0')} · DISC ${String(s.discardCount).padStart(2, '0')} · EXH ${String(s.exhaustCount).padStart(2, '0')}`,
+        }),
+      ]),
+      el('main', { class: 'combat-stage' }, [
+        el('div', { class: 'stage-caption' }, [el('span', { text: 'THREAT ASSESSMENT' }), el('i')]),
+        el('div', { class: 'enemy-row' }, enemies),
+      ]),
+      el('section', { class: 'hand-console' }, [
+        el('div', { class: 'hand-heading' }, [
+          el('div', {}, [
+            el('span', { class: 'eyebrow', text: 'TACTICAL HAND' }),
+            el('strong', { text: instruction }),
+          ]),
+          el('span', { class: 'hand-count', text: `${s.hand.length} CARDS` }),
+        ]),
+        el('div', { class: 'hand' }, hand),
         el('div', { class: 'action-bar' }, [
           el('button', {
-            class: 'btn primary',
-            text: 'Play',
+            class: 'btn play-btn primary',
+            text: selected?.needsTarget && liveEnemies.length > 1 ? 'Choose Target' : 'Execute Card',
             disabled: !selected || s.phase !== 'player',
             onClick: () => {
               if (!selected) return;
-              const live = s.enemies.filter((e) => !e.dead);
-              const targetId = selected.needsTarget && live.length === 1 ? live[0].id : null;
-              const r = c.playCard(selected.uid, targetId);
-              if (!r.ok) this.feedback(r.reason);
+              const target = selected.needsTarget && liveEnemies.length === 1 ? liveEnemies[0].id : null;
+              const result = c.playCard(selected.uid, target);
+              if (!result.ok) this.feedback(result.reason);
             },
           }),
           el('button', {
-            class: 'btn',
+            class: 'btn end-turn-btn',
             text: 'End Turn',
             disabled: s.phase !== 'player',
             onClick: () => c.endTurn(),
           }),
-          ...(g.run?.characterId === 'saul' && !c.flags.negotiated ? [el('button', {
-            class: 'btn negotiate-btn', text: 'Negotiate', disabled: s.phase !== 'player', onClick: () => c.negotiate(),
-          })] : []),
+          ...(g.run?.characterId === 'saul' && !c.flags.negotiated
+            ? [el('button', {
+                class: 'btn negotiate-btn',
+                disabled: s.phase !== 'player',
+                onClick: () => c.negotiate(),
+              }, [el('span', { text: 'NEGOTIATE EXIT' }), el('small', { text: 'Pay 50% gold · carry Weak into next fight' })])]
+            : []),
         ]),
       ]),
     ]);
 
-    // Hide unused lint
-    void playDisabled;
-
     ui.appendChild(this.root);
-
-    // combat mud layer visibility
-    if (g.mudLayer) g.mudLayer.classList.toggle('hidden', false);
+    g.mudLayer?.classList.toggle('hidden', false);
   }
 
   feedback(reason) {
@@ -192,6 +228,7 @@ export class CombatScene {
       need_target: 'Choose a target.',
       not_player_turn: 'Not your turn.',
       not_in_hand: 'Card not in hand.',
+      unplayable: 'This card cannot be played.',
     };
     this.game.pushMud(map[reason] || `Cannot play (${reason})`, 'warn');
   }

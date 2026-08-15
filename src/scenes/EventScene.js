@@ -2,7 +2,7 @@
  * Branching narrative event screen.
  */
 import { el, clear } from '../ui/dom.js';
-import { sceneArt } from '../ui/art.js';
+import { sceneArt, sceneStyle } from '../ui/art.js';
 import { getEvent } from '../data/events.js';
 
 export class EventScene {
@@ -79,7 +79,7 @@ export class EventScene {
       ];
     }
 
-    this.root = el('div', { class: 'screen event-screen art-screen', style: `--scene-art:url("${sceneArt('event')}")` }, [
+    this.root = el('div', { class: 'screen event-screen art-screen', style: sceneStyle('event') }, [
       el('div', { class: 'panel' }, [
         el('div', { class: 'stat-row' }, [
           el('span', { class: 'pill hp', html: `HP <span>${run.hp}/${run.maxHp}</span>` }),

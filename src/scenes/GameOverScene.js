@@ -2,7 +2,7 @@
  * Victory / defeat interstitial.
  */
 import { el, clear } from '../ui/dom.js';
-import { sceneArt } from '../ui/art.js';
+import { sceneArt, sceneStyle } from '../ui/art.js';
 import { CHARACTERS } from '../data/characters.js';
 
 export class GameOverScene {
@@ -32,7 +32,7 @@ export class GameOverScene {
     const run = g.run;
     const char = run ? CHARACTERS[run.characterId] : null;
 
-    this.root = el('div', { class: 'screen art-screen', style: `--scene-art:url("${sceneArt('boss')}")` }, [
+    this.root = el('div', { class: 'screen art-screen', style: sceneStyle('boss') }, [
       el('div', { class: 'overlay', style: 'position:relative;inset:auto;flex:1;background:transparent' }, [
         el('div', { class: 'modal' }, [
           el('h2', { text: win ? 'Empire Secured' : 'Buried in the Desert' }),

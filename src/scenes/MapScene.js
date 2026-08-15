@@ -2,7 +2,7 @@
  * Linear climb path viewer.
  */
 import { el, clear } from '../ui/dom.js';
-import { sceneArt } from '../ui/art.js';
+import { sceneArt, sceneStyle } from '../ui/art.js';
 import { CHARACTERS } from '../data/characters.js';
 import { RELICS } from '../data/relics.js';
 import { SaveManager } from '../core/SaveManager.js';
@@ -57,7 +57,7 @@ export class MapScene {
       ]);
     });
 
-    this.root = el('div', { class: 'screen map-screen art-screen', style: `--scene-art:url("${sceneArt('desert')}")` }, [
+    this.root = el('div', { class: 'screen map-screen art-screen', style: sceneStyle('desert') }, [
       el('div', { class: 'panel' }, [
         el('div', { class: 'stat-row' }, [
           el('span', { class: 'pill hp', html: `HP <span>${run.hp}/${run.maxHp}</span>` }),

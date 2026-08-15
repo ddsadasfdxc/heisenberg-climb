@@ -4,7 +4,7 @@
 import { el, clear } from '../ui/dom.js';
 import { SaveManager } from '../core/SaveManager.js';
 import { getLocale } from '../core/i18n.js';
-import { portrait, sceneArt } from '../ui/art.js';
+import { portrait, sceneArt, sceneStyle } from '../ui/art.js';
 
 export class MenuScene {
   /** @param {import('../core/Game.js').Game} game */
@@ -30,7 +30,7 @@ export class MenuScene {
     const hasRun = !!this.game.save?.currentRun;
 
     if (this.mode === 'title') {
-      this.root = el('div', { class: 'screen menu-screen art-screen', style: `--scene-art:url("${sceneArt('desert')}")` }, [
+      this.root = el('div', { class: 'screen menu-screen art-screen', style: sceneStyle('desert') }, [
         el('div', { class: 'top-tools' }, [
           el('button', { class: 'icon-btn', text: getLocale() === 'zh' ? 'EN' : '中文', onClick: () => this.game.toggleLanguage() }),
           el('button', { class: 'icon-btn', text: this.game.audio.enabled ? '🔊' : '🔇', onClick: () => this.game.toggleSound() }),
@@ -74,7 +74,7 @@ export class MenuScene {
       ]);
     } else {
       const chars = this.game.listCharacters();
-      this.root = el('div', { class: 'screen menu-screen roster-screen art-screen', style: `--scene-art:url("${sceneArt('operators')}")` }, [
+      this.root = el('div', { class: 'screen menu-screen roster-screen art-screen', style: sceneStyle('operators') }, [
         el('div', { class: 'top-tools' }, [
           el('button', { class: 'icon-btn', text: getLocale() === 'zh' ? 'EN' : '中文', title: 'Language', onClick: () => this.game.toggleLanguage() }),
         ]),
@@ -89,7 +89,7 @@ export class MenuScene {
               'button',
               {
                 class: 'char-btn',
-                style: `border-color:${c.color}55`,
+                style: `--operator-color:${c.color};border-color:${c.color}66`,
                 onClick: () => this.game.startRun(c.id),
               },
               [
