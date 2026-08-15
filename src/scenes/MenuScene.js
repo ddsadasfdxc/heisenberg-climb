@@ -74,12 +74,15 @@ export class MenuScene {
       ]);
     } else {
       const chars = this.game.listCharacters();
-      this.root = el('div', { class: 'screen menu-screen' }, [
+      this.root = el('div', { class: 'screen menu-screen roster-screen art-screen', style: `--scene-art:url("${sceneArt('operators')}")` }, [
+        el('div', { class: 'top-tools' }, [
+          el('button', { class: 'icon-btn', text: getLocale() === 'zh' ? 'EN' : '中文', title: 'Language', onClick: () => this.game.toggleLanguage() }),
+        ]),
         el('div', { class: 'title-block', style: 'margin-top:4vh' }, [
           el('h1', { text: 'Choose Operator' }),
           el('div', { class: 'sub', text: 'Talent passive applies for the whole run.' }),
         ]),
-        el('div', { class: 'menu-list' }, [
+        el('div', { class: 'menu-list roster-list' }, [
           ...chars.map((c) => {
             const prog = this.game.save.characterProgress?.[c.id] || {};
             return el(

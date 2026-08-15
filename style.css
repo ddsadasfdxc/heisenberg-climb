@@ -198,3 +198,15 @@ html[lang='zh-CN'] .card .cdesc { line-height: 1.5; }
   .card { width: 132px; min-height: 170px; }
   .enemy-card { width: 180px; }
 }
+
+
+/* Phase 2 polish: cinematic pixel-realistic roster */
+.roster-screen { overflow: hidden; }
+.roster-screen .title-block { margin-top: 3.5vh; position: relative; z-index: 1; }
+.roster-list { overflow-y: auto; padding: 6px 3px 12px; margin-top: 0; scrollbar-width: thin; }
+.roster-list .char-btn { background: linear-gradient(110deg,rgba(10,17,24,.95),rgba(31,39,49,.82)); border-left: 3px solid var(--accent); min-height: 82px; }
+.roster-list .char-btn:hover { transform: translateX(3px); border-color: var(--accent); }
+.roster-list .char-portrait { width: 68px; height: 68px; image-rendering: pixelated; filter: saturate(.9) contrast(1.12); }
+.roster-list .name { font-size: 1.02rem; letter-spacing: .025em; }
+html[lang='zh-CN'] .roster-list .desc { font-size: .8rem; }
+@media (min-width:700px) { .roster-list { grid-template-columns:1fr 1fr; max-width:900px; width:100%; margin:0 auto; } .roster-list > .btn { grid-column:1/-1; } }

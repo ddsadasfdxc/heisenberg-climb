@@ -12,7 +12,7 @@ export function portrait(id, name = '') {
 }
 
 export function sceneArt(kind = 'desert') {
-  const palettes = { desert: ['#d39b50','#401d18'], shop: ['#e4bd47','#311c36'], event: ['#45a69c','#151b32'], rest: ['#d16f4c','#18243b'], boss: ['#8f3145','#160f21'] };
+  const palettes = { desert: ['#d39b50','#401d18'], shop: ['#e4bd47','#311c36'], event: ['#45a69c','#151b32'], rest: ['#d16f4c','#18243b'], boss: ['#8f3145','#160f21'], operators: ['#3b7f78','#211522'] };
   const [a,b] = palettes[kind] || palettes.desert;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360"><defs><linearGradient id="s" y2="1"><stop stop-color="${b}"/><stop offset="1" stop-color="${a}"/></linearGradient></defs><rect width="800" height="360" fill="url(#s)"/><circle cx="650" cy="82" r="53" fill="#ffe3a1" opacity=".8"/><path d="M0 250Q120 180 260 245T520 225T800 230V360H0Z" fill="#1a1114" opacity=".72"/><path d="M115 235v-100h22v38h27v18h-27v44M520 235v-130h33l22 130" fill="#161319" opacity=".9"/><path d="M0 287h800" stroke="#ffe8b1" opacity=".2" stroke-width="4"/><text x="35" y="55" fill="white" opacity=".12" font-family="monospace" font-size="35" font-weight="bold">ALBUQUERQUE // 87101</text></svg>`)}`;
 }
