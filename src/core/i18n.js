@@ -73,7 +73,7 @@ export function t(value) {
     [/^(.+) is down\.$/, (_, x) => `${t(x)} 已倒下。`], [/^(.+) gains (\d+) Block$/, (_, x, n) => `${t(x)} 获得 ${n} 点格挡`],
     [/^(.+) heals (\d+)$/, (_, x, n) => `${t(x)} 恢复 ${n} 点生命`], [/^(.+) loses (\d+) HP(?: \((.+)\))?$/, (_, x, n, why) => `${t(x)} 损失 ${n} 点生命${why ? `（${t(why)}）` : ''}`],
     [/^(.+) gains (.+) (\d+)$/, (_, x, status, n) => `${t(x)} 获得 ${t(status)} ${n} 层`],
-    [/^(.+) intent reduced by (\d+)$/, (_, x, n) => `${t(x)} 的意图伤害降低 ${n}`], [/^(.+): (.+)$/, (_, x, y) => `${t(x)}：${t(y)}`],
+    [/^(.+) intent reduced by (\d+)$/, (_, x, n) => `${t(x)} 的意图伤害降低 ${n}`], [/^([^:]+): (.+)$/, (_, x, y) => `${t(x)}：${t(y)}`],
     [/^Yo, Science! — free card$/, '科学的力量！本张牌消耗为 0'], [/^Setup consumed \(\+50% dmg\)$/, '准备状态消耗（伤害 +50%）'], [/^Critical! \(Heisenberg Hat\)$/, '暴击！（海森堡之帽）'],
     [/^Deal (.+) damage\.$/, '造成 $1 点伤害。'], [/^Gain (.+) Block\.$/, '获得 $1 点格挡。'],
     [/^Added card to deck\.$/, '卡牌已加入牌组。'], [/^Not enough energy\.$/, '能量不足。'], [/^Choose a target\.$/, '请选择目标。'],
